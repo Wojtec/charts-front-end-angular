@@ -1,0 +1,5 @@
+node_modules
+/server/node_modules
+/server/dist
+/server/Template
+/server/EN - Assignment for Software-Engineers.pdf
