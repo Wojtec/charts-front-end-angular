@@ -41,11 +41,13 @@ export const compiler = async (
     // Loop for each readline.
     for await (const line of rl) {
       // Regular expression for split data.
-      const re = /[[ ":\]]/g;
+      const re = /[\s"[\]]/g;
       // Split data and remove empty string.
       const data = line.split(re).filter((el) => el.length != 0);
       // Split protocol string.
-      const protocol = data[7].split("/");
+      const protocol = data[4].split("/");
+      // Split time
+      const time = data[1].split(":");
       // id generate
       const id = Math.random().toString(36).substr(2, 9);
       // Create log object.
@@ -53,19 +55,19 @@ export const compiler = async (
         id: id,
         host: data[0],
         datetime: {
-          day: data[1],
-          hour: data[2],
-          minute: data[3],
-          second: data[4],
+          day: time[0],
+          hour: time[1],
+          minute: time[2],
+          second: time[3],
         },
         request: {
-          method: data[5],
-          url: data[6].split("/.").join("/"),
-          protocol: protocol[0],
-          protocol_version: protocol[1],
+          method: data[2],
+          url: data[3].split("/.").join("/"),
+          protocol: protocol[0] !== "HTTP" ? "" : protocol[0],
+          protocol_version: protocol[1] !== "1.0" ? "" : protocol[1],
         },
-        response_code: data[8],
-        document_size: data[9] === "-" ? "0" : data[9],
+        response_code: data[5],
+        document_size: data[6] === "-" ? "0" : data[6],
       };
       // Push object to array.
       logArr.push(log);
@@ -81,10 +83,35 @@ export const compiler = async (
 // Method for save data.
 const storeData = async (data: Array<Ilog>): Promise<void> => {
   try {
-    // Convert data to string.
-    const convertData = JSON.stringify(data);
-    // Write data in JSON file.
-    await fsPromise.writeFile("./server/dist/data.json", convertData);
+    new Promise((resolve, reject) => {
+      if (fs.existsSync("./server/dist/data.json")) {
+        fs.writeFile(
+          "./server/dist/data.json",
+          JSON.stringify(""),
+          (writeErr) => {
+            if (writeErr) reject(writeErr);
+            else resolve(null);
+          }
+        );
+        return fs.writeFile(
+          "./server/dist/data.json",
+          JSON.stringify(data, null, 2),
+          (writeErr) => {
+            if (writeErr) reject(writeErr);
+            else resolve(null);
+          }
+        );
+      } else {
+        fs.writeFile(
+          "./server/dist/data.json",
+          JSON.stringify(data, null, 2),
+          (writeErr) => {
+            if (writeErr) reject(writeErr);
+            else resolve(null);
+          }
+        );
+      }
+    });
   } catch (err) {
     console.log(err);
   }

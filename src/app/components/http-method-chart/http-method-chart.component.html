@@ -1,1 +1,12 @@
-<p>http-method-chart works!</p>
+<div>
+    <div style="display: block">
+        <h1 class="text-center">HTTP Methods in 24h</h1>
+      <canvas baseChart
+              [datasets]="pieChartData"
+              [labels]="pieChartLabels"
+              [options]="pieChartOptions"
+              [legend]="pieChartLegend"
+              [chartType]="pieChartType">
+      </canvas>
+    </div>
+  </div>
